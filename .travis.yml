@@ -1,0 +1,47 @@
+language: bash
+install: true
+sudo: required
+
+os:
+  - linux
+  - osx
+  - windows
+dist: bionic
+
+addons:
+  apt:
+    sources:
+      - sourceline: "ppa:openjdk-r/ppa"
+    update: true
+    packages:
+      - openjdk-12-jdk
+      - fakeroot
+  homebrew:
+    update: true
+    casks:
+      - java
+    packages:
+      - gradle
+
+script:
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo add-apt-repository -y ppa:cwchien/gradle; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get update; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt upgrade gradle; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then wget 'https://download.java.net/java/early_access/jpackage/1/openjdk-14-jpackage+1-35_linux-x64_bin.tar.gz'; tar xzf *.tar.gz; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then wget 'https://download.java.net/java/early_access/jpackage/1/openjdk-14-jpackage+1-35_osx-x64_bin.tar.gz'; tar xzf *.tar.gz; mv jdk-14.jdk/Contents/Home/ jdk-14; fi
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then wget 'https://download.java.net/java/early_access/jpackage/1/openjdk-14-jpackage+1-35_windows-x64_bin.zip'; unzip *.zip; choco install openjdk gradle -y; powershell Install-WindowsFeature Net-Framework-Core; cinst -y wixtoolset; export JAVA_HOME="C:\\Program Files\\OpenJDK\\jdk-12.0.2"; fi
+  - export BADASS_JLINK_JPACKAGE_HOME=$PWD/jdk-14
+  - gradle build jpackage
+  - mkdir out
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then mv build/packaging/*.deb build/libs/*-all.jar out; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then mv build/packaging/*.dmg out; fi
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then mv build/packaging/*.msi out; fi
+
+deploy:
+  provider: releases
+  api_key: $GITHUB_OAUTH
+  file_glob: true
+  file: out/*
+  skip_cleanup: true
+  on:
+    tags: true

@@ -1,14 +1,36 @@
 plugins {
+    id 'application'
     id 'java'
     id 'com.github.johnrengelman.shadow' version '5.1.0'
+    id 'org.beryx.jlink' version '2.15.1'
 }
 
 version '1.1'
 
 sourceCompatibility = 1.11
 
+ext.moduleName = 'handinui' 
+
+application {
+    mainClassName = 'handinui.HandinUI'
+}
+
 repositories {
     mavenCentral()
+}
+
+jlink {
+    options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+    jpackage {
+        outputDir = 'packaging'
+        if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
+            installerType = 'deb'
+        } else if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+            installerOptions = ['--win-menu', '--win-shortcut', '--win-dir-chooser']
+        } else if (org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
+        } else {
+        }
+    }
 }
 
 dependencies {
@@ -17,8 +39,12 @@ dependencies {
     implementation 'org.zeroturnaround:zt-zip:1.13'
 }
 
-jar {
-    manifest {
-        attributes "Main-Class": "HandinUI"
+compileJava {
+    inputs.property("moduleName", moduleName)
+    doFirst {
+        options.compilerArgs = [
+            '--module-path', classpath.asPath,
+        ]
+        classpath = files()
     }
 }
