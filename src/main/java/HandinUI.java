@@ -28,19 +28,24 @@ public class HandinUI {
         var panel = new HandinUI(frame);
 
         frame.setContentPane(panel.mainPanel);
+        frame.setSize(300, 500);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
     }
 
-    HandinUI(JFrame frame) {
+    private HandinUI(JFrame frame) {
         this.frame = frame;
-        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.PAGE_AXIS));
+        mainPanel.setLayout(new GridBagLayout());
+        var cc = new GridBagConstraints();
+        cc.fill = GridBagConstraints.HORIZONTAL;
+        cc.weightx = 1;
         mainPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
         var c = new GridBagConstraints();
 
         var serverPanel = new JPanel();
         serverPanel.setLayout(new GridBagLayout());
-        mainPanel.add(serverPanel);
+        cc.gridy = 0;
+        mainPanel.add(serverPanel, cc);
         c.gridx = 0;
         c.insets = new Insets(5, 5, 5, 5);
         serverPanel.add(new JLabel("UBC Server"), c);
@@ -52,7 +57,8 @@ public class HandinUI {
 
         c = new GridBagConstraints();
         var credentialsPanel = new JPanel(new GridBagLayout());
-        mainPanel.add(credentialsPanel);
+        cc.gridy = 1;
+        mainPanel.add(credentialsPanel, cc);
         c.insets = new Insets(5, 5, 5, 5);
         credentialsPanel.add(new JLabel("Username"), c);
         c.gridy = 1;
@@ -69,7 +75,6 @@ public class HandinUI {
         c.weightx = 0;
         c.fill = GridBagConstraints.NONE;
         c.anchor = GridBagConstraints.LINE_START;
-        credentialsPanel.add(saveCredentialsCheckBox, c);
         c.gridy = 1;
         c.fill = GridBagConstraints.HORIZONTAL;
         credentialsPanel.add(testButton, c);
@@ -80,7 +85,8 @@ public class HandinUI {
         testButton.addActionListener(e -> new SSHTestWorker().execute());
 
         var coursePanel = new JPanel(new GridBagLayout());
-        mainPanel.add(coursePanel);
+        cc.gridy = 2;
+        mainPanel.add(coursePanel, cc);
         c = new GridBagConstraints();
         c.insets = new Insets(5, 5, 5, 5);
         coursePanel.add(new JLabel("Course code"), c);
@@ -99,7 +105,8 @@ public class HandinUI {
         courseCodeTextField.getDocument().addDocumentListener(new SubmitEnabledListener());
 
         var submitPanel = new JPanel(new GridBagLayout());
-        mainPanel.add(submitPanel);
+        cc.gridy = 3;
+        mainPanel.add(submitPanel, cc);
         c = new GridBagConstraints();
         c.fill = GridBagConstraints.HORIZONTAL;
         c.insets = new Insets(5, 5, 5, 5);
@@ -128,7 +135,10 @@ public class HandinUI {
         submitLog.setEditable(false);
         submitDialogPanel.add(submitProgressBar, BorderLayout.SOUTH);
         submitDialogPanel.add(new JScrollPane(submitLog), BorderLayout.CENTER);
-        mainPanel.add(submitDialogPanel);
+        cc.gridy = 4;
+        cc.fill = GridBagConstraints.BOTH;
+        cc.weighty = 1;
+        mainPanel.add(submitDialogPanel, cc);
         submitProgressBar.setEnabled(false);
         submitButton.setEnabled(false);
 
