@@ -1,6 +1,6 @@
 # HandinUI
 
-Download: ![GitHub release (latest by date)](https://img.shields.io/github/v/release/sjsch/handinui)
+Download: [![GitHub release (latest by date)](https://img.shields.io/github/v/release/sjsch/handinui)](https://github.com/sjsch/handinui/releases/latest)
 
 A UI for UBC CS/ECE's command-line "handin" program.  Normally, a
 student would zip up their code, `scp` it onto the ECE server, then
