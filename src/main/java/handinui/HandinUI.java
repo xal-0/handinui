@@ -245,11 +245,15 @@ public class HandinUI {
                 submitProgressBar.setValue(1000);
                 session.close();
                 session = client.startSession();
-                cmd = session.exec("mkdir -p " + courseCodeTextField.getText()
+                cmd = session.exec("rm -rf " + courseCodeTextField.getText()
+                        + "/" + (String) assignmentComboBox.getSelectedItem()
+                        + "; mkdir -p " + courseCodeTextField.getText()
                         + "; chmod 0700 " + courseCodeTextField.getText()
-                        + "; unzip -o -d " + courseCodeTextField.getText() + " .handin/source.zip"
-                        + "/" + (String) assignmentComboBox.getSelectedItem());
+                        + "; unzip -o -d " + courseCodeTextField.getText()
+                        + "/" + (String) assignmentComboBox.getSelectedItem()
+                        + " .handinui/source.zip");
                 cmd.join();
+                submitLog.setText(submitLog.getText() + new String(cmd.getErrorStream().readAllBytes()));
                 session.close();
                 session = client.startSession();
                 cmd = session.exec("handin -p -o "
@@ -257,7 +261,7 @@ public class HandinUI {
                         + " "
                         + assignmentComboBox.getSelectedItem());
                 cmd.join();
-                submitLog.setText(new String(cmd.getErrorStream().readAllBytes()));
+                submitLog.setText(submitLog.getText() + new String(cmd.getErrorStream().readAllBytes()));
                 session.close();
                 session = client.startSession();
                 cmd = session.exec("handin -c "

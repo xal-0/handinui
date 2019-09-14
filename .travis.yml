@@ -33,7 +33,7 @@ script:
   - export BADASS_JLINK_JPACKAGE_HOME=$PWD/jdk-14
   - gradle build jpackage
   - mkdir out
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then mv build/packaging/*.deb build/libs/*-all.jar out; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then mv build/libs/*-all.jar out; fi
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then mv build/packaging/*.dmg out; fi
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then mv build/packaging/*.msi out; fi
 
