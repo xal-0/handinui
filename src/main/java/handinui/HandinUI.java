@@ -17,9 +17,9 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.*;
 import java.nio.file.Files;
-import java.util.zip.ZipOutputStream;
+import java.text.MessageFormat;
 
-public class HandinUI {
+class HandinUI {
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -36,7 +36,6 @@ public class HandinUI {
     }
 
     private HandinUI(JFrame frame) {
-        this.frame = frame;
         mainPanel.setLayout(new GridBagLayout());
         var cc = new GridBagConstraints();
         cc.fill = GridBagConstraints.HORIZONTAL;
@@ -112,6 +111,7 @@ public class HandinUI {
         c = new GridBagConstraints();
         c.fill = GridBagConstraints.HORIZONTAL;
         c.insets = new Insets(5, 5, 5, 5);
+        JButton selectDirectoryButton = new JButton("Select directory...");
         submitPanel.add(selectDirectoryButton, c);
         c.gridx = 2;
         submitPanel.add(submitButton, c);
@@ -144,9 +144,7 @@ public class HandinUI {
         submitProgressBar.setEnabled(false);
         submitButton.setEnabled(false);
 
-        submitButton.addActionListener(e -> {
-            new SubmitWorker().execute();
-        });
+        submitButton.addActionListener(e -> new SubmitWorker().execute());
 
         submitEnabled();
     }
@@ -169,7 +167,7 @@ public class HandinUI {
     }
 
     private void submitEnabled() {
-        boolean creds = !usernameField.getText().equals("") && !passwordField.getText().equals("");
+        boolean creds = !usernameField.getText().equals("") && passwordField.getPassword().length != 0;
         boolean fetch = creds && !courseCodeTextField.getText().equals("");
         boolean submit = selectedDirectory != null && selectedDirectory.exists()
                 && assignmentComboBox.getSelectedItem() != null
@@ -179,24 +177,29 @@ public class HandinUI {
         testButton.setEnabled(creds);
     }
 
-    ByteArrayOutputStream zipSelected() throws IOException {
+    private ByteArrayOutputStream zipSelected() throws IOException {
         var outstream = new ByteArrayOutputStream();
         var total = (int) Files.walk(selectedDirectory.toPath())
                 .count() - 1;
         final int[] count = {0};
-        ZipUtil.pack(selectedDirectory, outstream, new NameMapper() {
-            @Override
-            public String map(String name) {
-                count[0]++;
-                submitProgressBar.setValue(count[0] * 1000 / total / 2);
-                return name;
-            }
+        ZipUtil.pack(selectedDirectory, outstream, name -> {
+            count[0]++;
+            submitProgressBar.setValue(count[0] * 1000 / total / 2);
+            return name;
         });
         return outstream;
     }
 
     private void submitEnabled(ActionEvent e) {
         submitEnabled();
+    }
+
+    private String getCourseCode() {
+        return courseCodeTextField.getText()
+                .toLowerCase()
+                .strip()
+                .replace("-", "")
+                .replace(" ", "");
     }
 
     class SubmitWorker extends SwingWorker<Object, Object> {
@@ -220,9 +223,7 @@ public class HandinUI {
 
                     @Override
                     public StreamCopier.Listener file(String name, long size) {
-                        return transferred -> {
-                            submitProgressBar.setValue((int) (500 + transferred * 1000 / total / 2));
-                        };
+                        return transferred -> submitProgressBar.setValue((int) (500 + transferred * 1000 / total / 2));
                     }
                 });
                 InMemorySourceFile source = new InMemorySourceFile() {
@@ -237,7 +238,7 @@ public class HandinUI {
                     }
 
                     @Override
-                    public InputStream getInputStream() throws IOException {
+                    public InputStream getInputStream() {
                         return new ByteArrayInputStream(zipstream);
                     }
                 };
@@ -245,31 +246,21 @@ public class HandinUI {
                 submitProgressBar.setValue(1000);
                 session.close();
                 session = client.startSession();
-                cmd = session.exec("rm -rf " + courseCodeTextField.getText()
-                        + "/" + (String) assignmentComboBox.getSelectedItem()
-                        + "; mkdir -p " + courseCodeTextField.getText()
-                        + "; chmod 0700 " + courseCodeTextField.getText()
-                        + "; unzip -o -d " + courseCodeTextField.getText()
-                        + "/" + (String) assignmentComboBox.getSelectedItem()
-                        + " .handinui/source.zip");
+                cmd = session.exec(MessageFormat.format("rm -rf {0}/{1}; mkdir -p {0}; chmod 0700 {0}; unzip -o -d {0}/{1} .handinui/source.zip",
+                        getCourseCode(),
+                        assignmentComboBox.getSelectedItem()));
                 cmd.join();
-                submitLog.setText(submitLog.getText() + new String(cmd.getErrorStream().readAllBytes()));
+                updateLog(cmd);
                 session.close();
                 session = client.startSession();
-                cmd = session.exec("handin -p -o "
-                        + courseCodeTextField.getText()
-                        + " "
-                        + assignmentComboBox.getSelectedItem());
+                cmd = session.exec(MessageFormat.format("handin -p -o {0} {1}", getCourseCode(), assignmentComboBox.getSelectedItem()));
                 cmd.join();
-                submitLog.setText(submitLog.getText() + new String(cmd.getErrorStream().readAllBytes()));
+                updateLog(cmd);
                 session.close();
                 session = client.startSession();
-                cmd = session.exec("handin -c "
-                        + courseCodeTextField.getText()
-                        + " "
-                        + assignmentComboBox.getSelectedItem());
+                cmd = session.exec(MessageFormat.format("handin -c {0} {1}", getCourseCode(), assignmentComboBox.getSelectedItem()));
                 cmd.join();
-                submitLog.setText(submitLog.getText() + new String(cmd.getErrorStream().readAllBytes()));
+                updateLog(cmd);
                 stopSession();
             } catch (IOException e) {
                 JOptionPane.showMessageDialog(mainPanel, e.getMessage(), "Error",
@@ -281,6 +272,10 @@ public class HandinUI {
             }
 
             return null;
+        }
+
+        private void updateLog(Session.Command cmd) throws IOException {
+            submitLog.setText(submitLog.getText() + new String(cmd.getErrorStream().readAllBytes()));
         }
     }
 
@@ -315,7 +310,7 @@ public class HandinUI {
             setConnectButtonsEnabled(false);
             try {
                 startSession();
-                var cmd = session.exec("handin -l '" + courseCodeTextField.getText() + "'");
+                var cmd = session.exec("handin -l '" + getCourseCode() + "'");
                 cmd.join();
                 var text = new String(cmd.getInputStream().readAllBytes());
                 assignmentComboBox.removeAllItems();
@@ -363,20 +358,18 @@ public class HandinUI {
 
     private File selectedDirectory;
 
-    private JFrame frame;
-    private JPanel mainPanel = new JPanel();
-    private JProgressBar submitProgressBar = new JProgressBar(0, 1000);
-    private JTextArea submitLog = new JTextArea();
-    private JComboBox<String> serverComboBox = new JComboBox<>();
-    private JPasswordField passwordField = new JPasswordField();
-    private JTextField usernameField = new JTextField();
+    private final JPanel mainPanel = new JPanel();
+    private final JProgressBar submitProgressBar = new JProgressBar(0, 1000);
+    private final JTextArea submitLog = new JTextArea();
+    private final JComboBox<String> serverComboBox = new JComboBox<>();
+    private final JPasswordField passwordField = new JPasswordField();
+    private final JTextField usernameField = new JTextField();
     private JCheckBox saveCredentialsCheckBox = new JCheckBox("Save credentials");
-    private JButton testButton = new JButton("Test");
-    private JButton fetchAssignmentsButton = new JButton("Fetch assignments");
-    private JTextField courseCodeTextField = new JTextField();
-    private JComboBox<String> assignmentComboBox = new JComboBox<>();
-    private JButton selectDirectoryButton = new JButton("Select directory...");
-    private JButton submitButton = new JButton("Submit");
-    private JLabel directoryLabel = new JLabel("");
+    private final JButton testButton = new JButton("Test");
+    private final JButton fetchAssignmentsButton = new JButton("Fetch assignments");
+    private final JTextField courseCodeTextField = new JTextField();
+    private final JComboBox<String> assignmentComboBox = new JComboBox<>();
+    private final JButton submitButton = new JButton("Submit");
+    private final JLabel directoryLabel = new JLabel("");
 }
 
