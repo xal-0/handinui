@@ -29,7 +29,7 @@ script:
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt upgrade gradle; fi
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then wget 'https://download.java.net/java/early_access/jpackage/1/openjdk-14-jpackage+1-35_linux-x64_bin.tar.gz'; tar xzf *.tar.gz; fi
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then wget 'https://download.java.net/java/early_access/jpackage/1/openjdk-14-jpackage+1-35_osx-x64_bin.tar.gz'; tar xzf *.tar.gz; mv jdk-14.jdk/Contents/Home/ jdk-14; fi
-  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then wget 'https://download.java.net/java/early_access/jpackage/1/openjdk-14-jpackage+1-35_windows-x64_bin.zip'; unzip *.zip; choco install openjdk11 gradle -y; powershell Install-WindowsFeature Net-Framework-Core; cinst -y wixtoolset; refreshenv; fi
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then wget 'https://download.java.net/java/early_access/jpackage/1/openjdk-14-jpackage+1-35_windows-x64_bin.zip'; unzip *.zip; choco install openjdk11 gradle -y; powershell Install-WindowsFeature Net-Framework-Core; cinst -y wixtoolset; export JAVA_HOME="C:\\Program Files\\OpenJDK\\openjdk-11u-11.0.4_11\\"; fi
   - export BADASS_JLINK_JPACKAGE_HOME=$PWD/jdk-14
   - export GRADLE_OPTS=-Dorg.gradle.daemon=false
   - gradle build jpackage
