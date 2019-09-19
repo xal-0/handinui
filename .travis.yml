@@ -19,7 +19,7 @@ addons:
   homebrew:
     update: true
     casks:
-      - java
+      - caskroom/versions/java11
     packages:
       - gradle
 
