@@ -5,7 +5,7 @@ plugins {
     id 'org.beryx.jlink' version '2.15.1'
 }
 
-version '1.3.1'
+version '1.4.3'
 
 sourceCompatibility = 1.11
 
@@ -26,7 +26,7 @@ jlink {
         if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
             installerType = 'deb'
         } else if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
-            installerOptions = ['--app-version', '1.3.1', '--win-menu', '--win-shortcut', '--win-dir-chooser']
+            installerOptions = ['--app-version', '1.4.3', '--win-menu', '--win-shortcut', '--win-dir-chooser']
         } else if (org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
         } else {
         }

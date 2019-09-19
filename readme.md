@@ -3,9 +3,9 @@
 ## Downloads
 
 Download for:
-- Windows: [![](https://img.shields.io/github/downloads/sjsch/handinui/v1.4.2/handinui-1.4.2.msi)](https://github.com/sjsch/handinui/releases/download/v1.4.2/handinui-1.4.2.msi)
-- MacOS: [![](https://img.shields.io/github/downloads/sjsch/handinui/v1.4.2/handinui-1.0.dmg)](https://github.com/sjsch/handinui/releases/download/v1.4.2/handinui-1.0.dmg)
-- Linux and others: [![](https://img.shields.io/github/downloads/sjsch/handinui/v1.4.2/handinui-1.4.2-all.jar)](https://github.com/sjsch/handinui/releases/download/v1.4.2/handinui-1.4.2-all.jar)
+- Windows: [![](https://img.shields.io/github/downloads/sjsch/handinui/v1.4.3/handinui-1.4.3.msi)](https://github.com/sjsch/handinui/releases/download/v1.4.3/handinui-1.4.3.msi)
+- MacOS: [![](https://img.shields.io/github/downloads/sjsch/handinui/v1.4.3/handinui-1.0.dmg)](https://github.com/sjsch/handinui/releases/download/v1.4.3/handinui-1.0.dmg)
+- Linux and others: [![](https://img.shields.io/github/downloads/sjsch/handinui/v1.4.3/handinui-1.4.3-all.jar)](https://github.com/sjsch/handinui/releases/download/v1.4.3/handinui-1.4.3-all.jar)
 
 Other downloads: [![GitHub release (latest by date)](https://img.shields.io/github/v/release/sjsch/handinui)](https://github.com/sjsch/handinui/releases/latest)
 
