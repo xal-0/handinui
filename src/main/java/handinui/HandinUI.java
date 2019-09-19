@@ -250,7 +250,6 @@ class HandinUI {
                         getCourseCode(),
                         assignmentComboBox.getSelectedItem()));
                 cmd.join();
-                updateLog(cmd);
                 session.close();
                 session = client.startSession();
                 cmd = session.exec(MessageFormat.format("handin -p -o {0} {1}", getCourseCode(), assignmentComboBox.getSelectedItem()));
@@ -276,6 +275,7 @@ class HandinUI {
 
         private void updateLog(Session.Command cmd) throws IOException {
             submitLog.setText(submitLog.getText() + new String(cmd.getErrorStream().readAllBytes()));
+            submitLog.setText(submitLog.getText() + new String(cmd.getInputStream().readAllBytes()));
         }
     }
 
